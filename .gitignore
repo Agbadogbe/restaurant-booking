@@ -1,0 +1,44 @@
+# .gitignore
+
+### Dépendances
+# Node modules
+/node_modules
+/npm-debug.log*
+/yarn-error.log*
+/yarn-debug.log*
+
+### Fichiers d'environnement
+# Fichier contenant les clés, mots de passe, et secrets JWT.
+# NE DOIT JAMAIS ÊTRE COMMITTÉ !
+.env
+.env.development
+.env.production
+
+### Fichiers d'exécution et temporaires
+/dist
+/tmp
+
+### Logs et Caches
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+.nyc_output
+.cache
+/test/*.out
+
+### Fichiers de Base de Données
+# Si vous utilisez des fichiers pour la DB de test/mock ou sqlite.
+*.sqlite
+*.sqlite-journal
+/data/*.db
+
+### IDE (Visual Studio Code, JetBrains, etc.)
+.vscode
+.idea
+*.sublime-project
+*.sublime-workspace
+
+### Documentation
+# Si vous générez la documentation Swagger localement
+/documentation/swagger.json
