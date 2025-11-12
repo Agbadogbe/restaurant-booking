@@ -3,18 +3,18 @@
 const express = require('express');
 const router = express.Router();
 const UserController = require('../controllers/UserController');
-const validate = require('../middlewares/validator'); 
+const validate = require('../middlewares/validator');
 const { registerSchema, loginSchema } = require('../schemas/userSchema');
-const authMiddleware = require('../middlewares/authMiddleware'); // Middleware d'Auth JWT
-const { authRateLimiter } = require('../middlewares/rateLimiter'); // Limiteur strict
+const { protect, authorize } = require('../middlewares/authMiddleware');
+const { authRateLimiter } = require('../middlewares/rateLimiter');
 
 /**
  * @route POST /api/users/register
- * @description Inscription d'un nouvel utilisateur (rôle 'Client' par défaut).
+ * @description Inscription d'un nouvel utilisateur.
  * @access Public
  */
 router.post('/register', 
-    authRateLimiter, // Sécurité : Limite les tentatives d'inscription
+    authRateLimiter,
     validate(registerSchema), 
     UserController.register
 );
@@ -25,27 +25,49 @@ router.post('/register',
  * @access Public
  */
 router.post('/login', 
-    authRateLimiter, // Sécurité : Limite les tentatives de connexion
+    authRateLimiter,
     validate(loginSchema), 
     UserController.login
 );
 
 /**
- * @route GET /api/users
- * @description Récupère la liste de tous les utilisateurs (Exemple de route protégée).
- * @access Private (réservé aux Administrateurs)
- * CORRECTION: Cette route a été la source du TypeError (UserController.getAllUsers était undefined).
+ * @route POST /api/users/refresh-token
+ * @description Rafraîchir le token d'accès.
+ * @access Public
  */
-router.get('/', 
-    authMiddleware.protect, // 1. Vérifie si l'utilisateur est connecté et le token valide
-    authMiddleware.authorize('Admin'), // 2. Vérifie si le rôle est 'Admin'
-    UserController.getAllUsers // Contrôleur implémenté
+router.post('/refresh-token', 
+    UserController.refreshToken
 );
 
-// Route pour le Refresh Token (à implémenter)
-// router.post('/refresh', UserController.refreshToken); 
+/**
+ * @route GET /api/users
+ * @description Récupère la liste de tous les utilisateurs.
+ * @access Private (Admin seulement)
+ */
+router.get('/', 
+    protect,
+    authorize('Admin'),
+    UserController.getAllUsers
+);
 
-// Route pour le Profil Utilisateur (à implémenter)
-// router.get('/profile', authMiddleware.protect, UserController.getProfile); 
+/**
+ * @route GET /api/users/profile
+ * @description Récupère le profil de l'utilisateur connecté.
+ * @access Private
+ */
+router.get('/profile', 
+    protect,
+    UserController.getProfile
+);
+
+/**
+ * @route POST /api/users/logout
+ * @description Déconnexion de l'utilisateur.
+ * @access Private
+ */
+router.post('/logout', 
+    protect,
+    UserController.logout
+);
 
 module.exports = router;
