@@ -7,6 +7,7 @@ const validator = require('../middlewares/validator');
 const createRestaurantSchema = require('../schemas/restaurantSchema');
 const { protect, authorize } = require('../middlewares/authMiddleware');
 
+// ✅ CORRECTION : Créer une instance du contrôleur
 const restaurantController = new RestaurantController();
 
 // Route POST pour créer un restaurant (réservée aux Admins)

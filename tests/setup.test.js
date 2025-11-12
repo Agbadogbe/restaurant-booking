@@ -1,38 +1,55 @@
-// tests/setup.test.js (Extrait)
+// 🧩 tests/setup.test.js
 
-const app = require('../src/app'); // <-- Le changement ici est CRUCIAL
-const { pgPool } = require('../src/config'); 
+const app = require('../src/app');
+const { getPgPool, connectPostgreSQL, connectMongoDB, checkDatabaseStatus } = require('../src/config');
 const request = require('supertest');
 
-// Variables globales pour les tests (tokens, IDs)
-global.request = request(app); // Supertest utilise l'objet 'app' brut
-global.pgPool = pgPool;
-
-// ... (le reste du fichier reste inchangé) ...
-
-// Variables pour l'authentification de test
+// Variables globales pour les tests
 global.testUser = {
     email: "test.user@example.com",
-    password: "Password123", // Doit respecter le schéma de validation !
+    password: "Password123",
     nom: "UtilisateurTest",
     accessToken: null,
     refreshToken: null,
     id: null,
 };
 
-// Hook pour nettoyer la base de données avant chaque suite
+// Nettoyage initial avant TOUS les tests
 before(async () => {
-    // ⚠️ ATTENTION : Ceci EST DÉSTRUCTEUR. 
-    // Assurez-vous d'utiliser une base de données de test dédiée (test_restaurant_db)
+    console.log('🚀 Initialisation des tests...');
     
-    // Suppression des données utilisateur et de token avant les tests
-    await pgPool.query('DELETE FROM users WHERE email = $1', [global.testUser.email]);
-    console.log("Pré-nettoyage des données terminé.");
+    try {
+        // 1. Initialiser les bases de données
+        await connectPostgreSQL();
+        await connectMongoDB();
+        
+        // 2. Récupérer le pool maintenant qu'il est initialisé
+        const pgPool = getPgPool();
+        global.pgPool = pgPool;
+        
+        // 3. Rendre l'app disponible globalement
+        global.request = request(app);
+        
+        // 4. Nettoyage des tables
+        console.log('🧹 Nettoyage initial des tables...');
+        await pgPool.query('TRUNCATE TABLE users, restaurants, reservations RESTART IDENTITY CASCADE;');
+        console.log('✅ Base de test propre et prête.');
+
+        // 5. Vérifier l'état de la base
+        await checkDatabaseStatus();
+        
+    } catch (error) {
+        console.error('❌ Erreur lors de l\'initialisation des tests:', error);
+        throw error;
+    }
 });
 
-// Hook pour garantir que les connexions sont fermées après tous les tests
+// Nettoyage et fermeture du pool à la fin de tous les tests
 after(async () => {
-    // Si vous utilisez une fonction de déconnexion dans config.js, utilisez-la ici
-    // Exemple : await disconnectPostgreSQL();
-    console.log("Fermeture du pool de connexion PostgreSQL.");
+    console.log('🧩 Fermeture des connexions...');
+    
+    if (global.pgPool) {
+        await global.pgPool.end();
+        console.log('✅ Pool PostgreSQL fermé.');
+    }
 });

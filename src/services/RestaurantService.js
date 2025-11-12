@@ -1,25 +1,23 @@
 // src/services/RestaurantService.js
 
-const { pgPool } = require('../config');
+const { getPgPool } = require('../config');
+const RestaurantModel = require('../models/RestaurantModel');
 
 class RestaurantService {
     
     /**
      * Crée un nouveau restaurant dans la base de données PostgreSQL.
      */
-    async createRestaurant(data) {
+    static async createRestaurant(data) {
         const { nom, adresse, description, capacite_max } = data;
 
         try {
-            const query = `
-                INSERT INTO restaurants (nom, adresse, description, capacite_max)
-                VALUES ($1, $2, $3, $4)
-                RETURNING id_restaurant, nom, adresse, description, capacite_max, created_at;
-            `;
-            const values = [nom, adresse, description, capacite_max];
-            
-            const result = await pgPool.query(query, values);
-            return result.rows[0];
+            return await RestaurantModel.create({
+                nom, 
+                adresse, 
+                description, 
+                capacite_max
+            });
 
         } catch (error) {
             // Gestion spécifique des erreurs PostgreSQL
@@ -32,24 +30,20 @@ class RestaurantService {
                 customError.status = 400;
                 throw customError;
             }
-            throw error;
+            
+            // Erreur générique
+            const serviceError = new Error(`Erreur lors de la création du restaurant: ${error.message}`);
+            serviceError.status = 500;
+            throw serviceError;
         }
     }
 
     /**
      * Récupère la liste de tous les restaurants.
      */
-    async getAllRestaurants() {
+    static async getAllRestaurants() {
         try {
-            const query = `
-                SELECT id_restaurant, nom, adresse, description, capacite_max, created_at
-                FROM restaurants 
-                ORDER BY nom ASC;
-            `;
-            
-            const result = await pgPool.query(query);
-            return result.rows;
-
+            return await RestaurantModel.findAll();
         } catch (error) {
             const serviceError = new Error(`Erreur lors de la récupération des restaurants: ${error.message}`);
             serviceError.status = 500;
@@ -60,23 +54,17 @@ class RestaurantService {
     /**
      * Récupère un restaurant par son ID.
      */
-    async getRestaurantById(id) {
+    static async getRestaurantById(id) {
         try {
-            const query = `
-                SELECT id_restaurant, nom, adresse, description, capacite_max, created_at
-                FROM restaurants 
-                WHERE id_restaurant = $1;
-            `;
+            const restaurant = await RestaurantModel.findById(id);
             
-            const result = await pgPool.query(query, [id]);
-            
-            if (result.rows.length === 0) {
+            if (!restaurant) {
                 const notFoundError = new Error('Restaurant non trouvé');
                 notFoundError.status = 404;
                 throw notFoundError;
             }
             
-            return result.rows[0];
+            return restaurant;
 
         } catch (error) {
             if (error.status === 404) throw error;
@@ -90,27 +78,17 @@ class RestaurantService {
     /**
      * Met à jour un restaurant existant.
      */
-    async updateRestaurant(id, data) {
-        const { nom, adresse, description, capacite_max } = data;
-
+    static async updateRestaurant(id, data) {
         try {
-            const query = `
-                UPDATE restaurants 
-                SET nom = $1, adresse = $2, description = $3, capacite_max = $4, updated_at = CURRENT_TIMESTAMP
-                WHERE id_restaurant = $5
-                RETURNING id_restaurant, nom, adresse, description, capacite_max, created_at, updated_at;
-            `;
-            const values = [nom, adresse, description, capacite_max, id];
+            const restaurant = await RestaurantModel.update(id, data);
             
-            const result = await pgPool.query(query, values);
-            
-            if (result.rows.length === 0) {
+            if (!restaurant) {
                 const notFoundError = new Error('Restaurant non trouvé');
                 notFoundError.status = 404;
                 throw notFoundError;
             }
             
-            return result.rows[0];
+            return restaurant;
 
         } catch (error) {
             if (error.status === 404) throw error;
@@ -130,21 +108,17 @@ class RestaurantService {
     /**
      * Supprime un restaurant.
      */
-    async deleteRestaurant(id) {
+    static async deleteRestaurant(id) {
         try {
-            const query = `
-                DELETE FROM restaurants 
-                WHERE id_restaurant = $1
-                RETURNING id_restaurant;
-            `;
+            const result = await RestaurantModel.delete(id);
             
-            const result = await pgPool.query(query, [id]);
-            
-            if (result.rows.length === 0) {
+            if (!result) {
                 const notFoundError = new Error('Restaurant non trouvé');
                 notFoundError.status = 404;
                 throw notFoundError;
             }
+
+            return result;
 
         } catch (error) {
             if (error.status === 404) throw error;
@@ -161,7 +135,46 @@ class RestaurantService {
             throw serviceError;
         }
     }
+
+    /**
+     * Recherche des restaurants par nom.
+     */
+    static async searchRestaurants(nom) {
+        try {
+            return await RestaurantModel.searchByName(nom);
+        } catch (error) {
+            const serviceError = new Error(`Erreur lors de la recherche des restaurants: ${error.message}`);
+            serviceError.status = 500;
+            throw serviceError;
+        }
+    }
+
+    /**
+     * Récupère les restaurants par capacité.
+     */
+    static async getRestaurantsByCapacity(min, max) {
+        try {
+            return await RestaurantModel.findByCapacity(min, max);
+        } catch (error) {
+            const serviceError = new Error(`Erreur lors du filtrage par capacité: ${error.message}`);
+            serviceError.status = 500;
+            throw serviceError;
+        }
+    }
+
+    /**
+     * Récupère les statistiques des restaurants.
+     */
+    static async getRestaurantStats() {
+        try {
+            return await RestaurantModel.getStats();
+        } catch (error) {
+            const serviceError = new Error(`Erreur lors de la récupération des statistiques: ${error.message}`);
+            serviceError.status = 500;
+            throw serviceError;
+        }
+    }
 }
 
-// Export d'une instance du service
-module.exports = new RestaurantService();
+// Export de la classe avec méthodes statiques
+module.exports = RestaurantService;

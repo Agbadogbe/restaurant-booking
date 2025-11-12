@@ -9,24 +9,32 @@ const errorHandler = (err, req, res, next) => {
     
     const isDevelopment = process.env.NODE_ENV === 'development';
     
+    // 🔍 LOG pour debug des erreurs 500
+    if (status === 500) {
+        console.error('🔴 ERREUR 500:', {
+            message: err.message,
+            stack: err.stack,
+            url: req.url,
+            method: req.method,
+            body: req.body
+        });
+    }
+    
     let responseData = {
         success: false,
         status: status,
         message: message,
     };
     
-    // ✅ CORRECTION : Utiliser 'errors' au lieu de 'details'
     if (status === 400 && err.errors) {
-        responseData.errors = err.errors; // ✅ Changé de 'details' à 'errors'
+        responseData.errors = err.errors;
         responseData.message = "Données invalides fournies.";
     }
 
-    // Si c'est une erreur 500 en production, on cache le message détaillé
     if (status === 500 && !isDevelopment) {
         responseData.message = "Erreur interne du serveur.";
     }
 
-    // Ajoute la stack trace uniquement en mode développement pour le débogage
     if (isDevelopment && err.stack) {
         responseData.stack = err.stack;
     }
