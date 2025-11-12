@@ -14,9 +14,12 @@ const validate = (schema) => (req, res, next) => {
         const validationError = new Error("Erreur de validation des données.");
         validationError.status = 400; 
         validationError.details = error.details.map(detail => ({
-            field: detail.context.key,
+            field: detail.path.join('.'),
             message: detail.message.replace(/['"]/g, ''),
         }));
+
+        // ✅ CORRECTION : Stocker les erreurs dans 'errors' au lieu de 'details'
+        validationError.errors = validationError.details;
         
         return next(validationError);
     }

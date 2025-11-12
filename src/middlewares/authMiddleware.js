@@ -11,10 +11,11 @@ exports.protect = (req, res, next) => {
 
     // 1. Récupération du token
     const authHeader = req.headers.authorization;
-    if (authHeader && authHeader.startsWith('Bearer')) {
-        // Format: "Bearer <token>" -> on prend le token (index 1)
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+
         token = authHeader.split(' ')[1];
     }
+
 
     // 2. Vérification de la présence du token
     if (!token) {
