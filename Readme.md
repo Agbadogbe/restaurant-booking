@@ -214,7 +214,7 @@ Les tests couvrent :
 
 ```
 src/
-├── config/           # Configuration DB et Swagger
+├── config/           # Swagger
 ├── controllers/      # Logique métier
 ├── middlewares/      # Auth, validation, rate limiting
 ├── models/          # Modèles de données
@@ -247,33 +247,6 @@ L'API retourne des réponses standardisées :
 - 429 : Trop de requêtes
 - 500 : Erreur serveur
 
-## 🚀 Déploiement
-
-### Variables d'environnement production
-```env
-NODE_ENV=production
-ALLOWED_ORIGINS=https://votre-domaine.com
-# ... autres variables
-```
-
-### avec Docker (Optionnel)
-```dockerfile
-FROM node:18-alpine
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci --only=production
-COPY . .
-EXPOSE 3000
-CMD ["npm", "start"]
-```
-
-## 🤝 Contribution
-
-1. Fork le projet
-2. Créer une branche feature (`git checkout -b feature/AmazingFeature`)
-3. Commit les changements (`git commit -m 'Add AmazingFeature'`)
-4. Push sur la branche (`git push origin feature/AmazingFeature`)
-5. Ouvrir une Pull Request
 
 ## 📄 Licence
 
@@ -290,8 +263,6 @@ Ce projet est sous licence MIT - voir le fichier [LICENSE](LICENSE) pour plus de
 - Tous les contributeurs des packages open source utilisés
 
 ---
-
-**⭐ N'oubliez pas de mettre une star si ce projet vous est utile !**# 🛡️ API Recettes Sécurisée (JWT + Bcrypt)
 
 **Objectif du projet** : Concevoir et implémenter une API REST sécurisée utilisant Node.js, Express et MongoDB, en respectant les exigences de sécurité strictes du TP (JWT, bcrypt, CORS, Rate Limiting).
 
@@ -331,7 +302,7 @@ Ce projet est sous licence MIT - voir le fichier [LICENSE](LICENSE) pour plus de
 1.  **Cloner le dépôt et installer les dépendances :**
 
     ```bash
-    git clone [URL_DE_VOTRE_DEPOT]
+    git clone https://github.com/Agbadogbe/restaurant-booking.git
     cd my-secure-api
     npm install
     ```
