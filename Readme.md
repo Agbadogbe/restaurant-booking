@@ -247,11 +247,6 @@ L'API retourne des réponses standardisées :
 - 429 : Trop de requêtes
 - 500 : Erreur serveur
 
-
-## 📄 Licence
-
-Ce projet est sous licence MIT - voir le fichier [LICENSE](LICENSE) pour plus de détails.
-
 ## 👥 Auteurs
 
 [Imhotep KAKPO](https://github.com/Agbadogbe)
