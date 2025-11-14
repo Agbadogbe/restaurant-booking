@@ -254,9 +254,11 @@ Ce projet est sous licence MIT - voir le fichier [LICENSE](LICENSE) pour plus de
 
 ## 👥 Auteurs
 
-- **Votre Nom** - _Développement initial_ - [Agbadogbe](https://github.com/Agbadogbe)
+- **Votre Nom** - _Développement initial_ - [kakpo imhotep](https://github.com/Agbadogbe)
+- **Votre Nom** - _Développement initial_ - [ADJAHO Mabrouk](https://github.com)
 
-## 🙏 Remerciements
+
+## 🙏 Remerciements 
 
 - EFREI Paris pour le sujet de TP
 - La communauté Express.js et MongoDB
